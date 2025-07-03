@@ -2,12 +2,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/fireba
 import { getFirestore, addDoc, doc, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAEonkU31PkXC-O1wicIq85CJX_Z36KBlc",
-  authDomain: "briefschleife.firebaseapp.com",
-  projectId: "briefschleife",
-  storageBucket: "briefschleife.firebasestorage.app",
-  messagingSenderId: "986674255600",
-  appId: "1:986674255600:web:263b7df21b10e3a08d1435"
+  apiKey: "AIzaSyBQrF1Cm-t9wiWGDXLTLMo4rw8sx21CGzc",
+  projectId: "gama-authentication",
+  appId: "1:780644758149:web:ae38f5e09aab8eb355efec",
 };
 
 const app = initializeApp(firebaseConfig);
