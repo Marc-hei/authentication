@@ -27,6 +27,9 @@ function registerStart (username) {
 async function registerFinish (username, credential) {
     // Verify the attestation response
     // id, rawid, response, type, authenticatorAttachment
+    const attestation = credential.response;
+    console.log(attestation.getPublicKey());
+    console.log(attestation.getPublicKeyAlgorithm());
     let verification;
     // try {
     //     verification = await SimpleWebAuthnServer.verifyRegistrationResponse({
