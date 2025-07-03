@@ -49,18 +49,20 @@ async function registerFinish (username, credential) {
 
 function loginStart(username) {
     //let username = req.body.username;
-    if (!users[username]) {
-        return false;
-    }
-    let challenge = getNewChallenge();
+    // if (!users[username]) {
+    //     return false;
+    // }
+    let challenge = createUint8Array();
     challenges[username] = challenge;
     return {
-        challenge,
-        RPID,
-        allowCredentials: [{
-            type: 'public-key',
-            id: users[username].credentialID,
-        }],
+        challenge: challenge,
+        rpId: RPID,
+        // allowCredentials: [
+    //   {
+    //     type: "public-key",
+    //     id: new Uint8Array([64, 66, 25, 78, 168, 226, 174 /* … */]),
+    //   },
+    // ],
         userVerification: 'required',
     };
 };

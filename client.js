@@ -26,6 +26,7 @@ async function login(username) {
   const options = loginStart(username);
   console.dir(options)
   const credential = await navigator.credentials.get({publicKey: options});
+  console.dir(credential)
   const response = loginFinish(username, credential);
   console.log(response)
   if (response == true) {
