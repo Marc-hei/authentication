@@ -16,7 +16,7 @@ function registerStart (username) {
     const pubKey = {
         challenge: challenge,
         rp: {id: RPID, name: RPNAME},
-        user: {id: getNewChallenge(), name: username},
+        user: {id: createUserId(), name: username},
         pubKeyCredParams: [
 
             {type: 'public-key', alg: -7},
@@ -98,8 +98,9 @@ async function loginFinish (username, credential) {
 };
 
 function getNewChallenge() {
-    return crypto.randomUUID;
+    return new Uint8Array(crypto.randomBytes(16));
 }
-function convertChallenge(challenge) {
-    return btoa(challenge).replaceAll('=', '');
+
+function createUserId() {
+    return crypto.randomUUID();
 }
