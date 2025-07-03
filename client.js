@@ -1,3 +1,6 @@
+// IMPORTS
+import { registerStart, registerFinish, loginStart, loginFinish } from './server.js';
+
 // DOM ELEMENTS
 const registerKey = document.getElementById('register');
 const loginKey = document.getElementById('login');
