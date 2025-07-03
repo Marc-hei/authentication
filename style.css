@@ -1,0 +1,11 @@
+body {
+  margin: 0;
+}
+
+
+.buttons {
+  margin: 50px auto;
+  display: block;
+  padding: 50px;
+  font-size: xx-large
+}
