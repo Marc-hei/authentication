@@ -1,4 +1,4 @@
 export const env = {
-  RPID: "http://localhost",
+  RPID: "localhost",
   RPNAME: "localhost"
 }
