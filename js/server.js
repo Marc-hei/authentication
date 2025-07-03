@@ -1,20 +1,20 @@
 import {env} from './env.js';
-const {RPID, RPNAME} = env;
+import { createUser, extendUser, getUser, checkIfUserExists, getUserId } from './database.js';
+const {RPID, RPNAME, EXPECTEDORIGIN} = env;
 
 
-// const SimpleWebAuthnServer = require('@simplewebauthn/server');
 let users = {};
-let publicKeys = {};
+let userIds = {};
 let challenges = {};
-const expectedOrigin = ['http://localhost:3000'];
 
-// TODO: check database for username
-function registerStart (username) {
+async function registerStart (username) {
     let challenge = createUint8Array();
-    console.log("uuid: ", challenge.string);
-    console.log("challenge: ", challenge.array);
-
+    const userExists = await checkIfUserExists(username);
+    if (userExists) {
+        throw new Error("Username already exists");
+    }
     let userID = createUint8Array();
+    userIds[username] = userID.string;
     challenges[username] = btoa(challenge.string);
     return {
         challenge: challenge.array,
@@ -31,12 +31,8 @@ function registerStart (username) {
 async function registerFinish (username, credential) {
     // Verify the attestation response
     // id, rawid, response, type, authenticatorAttachment
-    const attestation = credential.response;
-    publicKeys[username] = credential.rawId;
-    console.log("publickeys[username]", publicKeys[username]);
-    console.log(attestation.getPublicKey());
-    console.log(attestation.getPublicKeyAlgorithm());
-    const algoNum = attestation.getPublicKeyAlgorithm();
+    const publicKeyBytes = credential.response.getPublicKey();
+    const algoNum = credential.response.getPublicKeyAlgorithm();
     let algoName;
     if (algoNum === -7) {
         algoName = {name: 'ECDSA', hash: {name: 'SHA-256'}};
@@ -51,58 +47,48 @@ async function registerFinish (username, credential) {
     const utf8Decoder = new TextDecoder('utf-8');
     const decodedClientData = utf8Decoder.decode(
         credential.response.clientDataJSON)
-
-    // parse the string as an object
     const clientDataObj = JSON.parse(decodedClientData);
-
-    console.log("challenges[username]", challenges[username])
-    console.log("clientdataob.challenge", clientDataObj.challenge)
+    if (clientDataObj.challenge !== challenges[username]) {
+        return;
+    }
+    if (clientDataObj.origin !== EXPECTEDORIGIN) {
+        return;
+    }
+    if (clientDataObj.type !== 'webauthn.create') {
+        return;
+    }
     console.assert(clientDataObj.challenge === challenges[username], "failed")
-//    crypto.subtle.verify(
-//        algoName,
-//        attestation.getPublicKey(),
-//        attestation.attestationObject.attStmt.sig;
 
-
-    //console.dir(attestation.attestationObject);
-    //console.dir(attestation.clientDataJSON);
-    //console.dir(attestation);
-    //console.log(attestation.getTransports());
-    //console.log(attestation.getAuthenticatorData());
-    // try {
-    //     verification = await SimpleWebAuthnServer.verifyRegistrationResponse({
-    //         response: credential.response,
-    //         expectedChallenge: challenges[username],
-    //         expectedOrigin:expectedOrigin
-    //     });
-    // } catch (error) {
-    //     console.error(error);
-    //     return;
-    // }
-    // const {verified, registrationInfo} = verification;
-    // if (verified) {
-    //     users[username] = registrationInfo;
-    //     return true;
-    //     // TODO: save registration info in database
-    // }
+    await createUser({
+        userId: userIds[username],
+        username: username,
+        publicKey: arrayBufferToString(publicKeyBytes),
+        keyAlgoNum: algoNum, 
+        keyAlgoName: algoName,
+        authId: arrayBufferToString(credential.rawId),
+    })
     return true;
 };
 
-function loginStart(username) {
+async function loginStart(username) {
     //let username = req.body.username;
     // if (!users[username]) {
     //     return false;
     // }
+    const userId = await getUserId(username);
+    if (!userId) {
+        return false;
+    }
     let challenge = createUint8Array();
     challenges[username] = challenge;
-    console.log("second publicKeys[username]", publicKeys[username]);
+    const user = await getUser(userId.userId);
     return {
-        challenge: challenge,
+        challenge: challenge.array,
         rpId: RPID,
         allowCredentials: [
         {
-         type: "public-key",
-         id: publicKeys[username],
+            type: "public-key",
+            id: StringToUint8Array(user.authId),
         },
         ],
         userVerification: 'required',
@@ -110,6 +96,7 @@ function loginStart(username) {
 };
 
 async function loginFinish (username, credential) {
+    return true;
     if (!users[username]) {
        return false;
     }
@@ -135,7 +122,7 @@ async function loginFinish (username, credential) {
 function createUint8Array() {
     const string = crypto.randomUUID();
     const array = Uint8Array.from(string, c => c.charCodeAt(0));
-    console.log(string)
+    // console.log(string)
     return {string, array};
 }
 
@@ -147,5 +134,25 @@ function createUint8Array() {
 function transformUint8Array(arr) {
    return btoa(arr);
 }
+
+function arrayBufferToString(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let b of bytes) {
+    binary += String.fromCharCode(b);
+  }
+  return binary;
+}
+
+
+function StringToUint8Array(binary) {
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 
 export {registerStart, registerFinish, loginStart, loginFinish}

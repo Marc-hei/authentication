@@ -13,18 +13,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-async function createUser({ userId, username, publicKeyBytes, keyAlgoNum, keyAlgoName }) {
+async function createUser(options) {
+  const { userId, username } = options
   try {
-    await addDoc(doc(db, "usernames", username), {
-      userId,
-    });
-    await addDoc(doc(db, "users", userId), {
-      userId,
-      username,
-      publicKeyBytes,
-      keyAlgoNum,
-      keyAlgoName,
-    })
+    await setDoc(doc(db, "usernames", username), {userId});
+    await setDoc(doc(db, "users", userId), options)
   } catch (e) {
     console.error("Error adding document: ", e);
   }
@@ -53,10 +46,29 @@ async function getUser(userId) {
   }
 }
 
+async function getUserId(username) {
+  try {
+    const snapshot = await getDoc(doc(db, "usernames", username));
+    if (snapshot.exists()) {
+      return snapshot.data();
+    } else {
+      return null;
+    }
+  } catch (e) {
+    console.error("Error getting userId: ", e);
+    return null;
+  }
+}
+
 async function checkIfUserExists(username) {
   try {
-    const usernameSnap = await getDoc(doc(db, "usernames", username));
-    return usernameSnap.exists();
+    console.log("CHeckpoint2")
+    const snapshot = await getDoc(doc(db, "usernames", username));
+    if (snapshot.exists()) {
+      return true;
+    } else {
+      return false;
+    }
   } catch (e) {
     console.error("Error checking username: ", e);
     return false;
@@ -64,4 +76,4 @@ async function checkIfUserExists(username) {
 }
 
 
-export { createUser, extendUser, getUser, checkIfUserExists }
+export { createUser, extendUser, getUser, checkIfUserExists, getUserId }
