@@ -23,6 +23,7 @@ async function register(username) {
 
 
 async function login(username) {
+  username = "hello"
   const options = loginStart(username);
   console.dir(options)
   const credential = await navigator.credentials.get({publicKey: options});

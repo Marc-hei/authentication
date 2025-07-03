@@ -4,6 +4,7 @@ const {RPID, RPNAME} = env;
 
 // const SimpleWebAuthnServer = require('@simplewebauthn/server');
 let users = {};
+let publicKeys = {};
 let challenges = {};
 const expectedOrigin = ['http://localhost:3000'];
 
@@ -31,6 +32,8 @@ async function registerFinish (username, credential) {
     // Verify the attestation response
     // id, rawid, response, type, authenticatorAttachment
     const attestation = credential.response;
+    publicKeys[username] = credential.rawId;
+    console.log("publickeys[username]", publicKeys[username]);
     console.log(attestation.getPublicKey());
     console.log(attestation.getPublicKeyAlgorithm());
     const algoNum = attestation.getPublicKeyAlgorithm();
@@ -92,15 +95,16 @@ function loginStart(username) {
     // }
     let challenge = createUint8Array();
     challenges[username] = challenge;
+    console.log("second publicKeys[username]", publicKeys[username]);
     return {
         challenge: challenge,
         rpId: RPID,
-        // allowCredentials: [
-    //   {
-    //     type: "public-key",
-    //     id: new Uint8Array([64, 66, 25, 78, 168, 226, 174 /* … */]),
-    //   },
-    // ],
+        allowCredentials: [
+        {
+         type: "public-key",
+         id: publicKeys[username],
+        },
+        ],
         userVerification: 'required',
     };
 };
