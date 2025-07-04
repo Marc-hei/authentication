@@ -1,6 +1,9 @@
-import {env} from './env.js';
 import { createUser, extendUser, getUser, checkIfUserExists, getUserId } from './database.js';
-const {RPID, RPNAME, EXPECTEDORIGIN} = env;
+import {decode } from './cbor.js'
+import {coseToJwk } from './cose-to-jwk.js'
+const RPID = import.meta.env.RPID;
+const RPNAME = import.meta.env.RPNAME;
+const EXPECTEDORIGIN = import.meta.env.EXPECTEDORIGIN;
 
 
 let users = {};
@@ -76,12 +79,14 @@ async function loginStart(username) {
     //     return false;
     // }
     const userId = await getUserId(username);
+    console.log(userId);
     if (!userId) {
         return false;
     }
     let challenge = createUint8Array();
     challenges[username] = challenge;
     const user = await getUser(userId.userId);
+    console.log(user);
     return {
         challenge: challenge.array,
         rpId: RPID,
@@ -97,10 +102,25 @@ async function loginStart(username) {
 
 async function loginFinish (username, credential) {
     return true;
-    if (!users[username]) {
-       return false;
+    const userId = await getUserId(username);
+    if (!userId) {
+        return false;
     }
-    let verification;
+
+    const user = await getUser(userId.userId);
+
+    // 3. Map to JWK
+    const publicKey = StringToUint8Array(user.publicKey);
+    console.log(publicKey);
+    const jwk = coseToJwk(user.publicKey);
+
+    const verified = crypto.subtle.verify(
+        user.keyAlgoName,
+        jwk,
+        credential.signature,
+        credential.clientDataJSON || credential.authenticatorData
+    )
+    console.log("verified: ", verified)
     // try {
     //     const user = users[username];
     //     verification = await SimpleWebAuthnServer.verifyAuthenticationResponse({
@@ -116,7 +136,7 @@ async function loginFinish (username, credential) {
     //     return {error: error.message};
     // }
     // const {verified} = verification;
-    // return verified;
+    return verified;
 };
 
 function createUint8Array() {
