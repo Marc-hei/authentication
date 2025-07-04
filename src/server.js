@@ -1,8 +1,9 @@
-import {env} from './env.js';
 import { createUser, extendUser, getUser, checkIfUserExists, getUserId } from './database.js';
 import {decode } from './cbor.js'
 import {coseToJwk } from './cose-to-jwk.js'
-const {RPID, RPNAME, EXPECTEDORIGIN} = env;
+const RPID = import.meta.env.RPID;
+const RPNAME = import.meta.env.RPNAME;
+const EXPECTEDORIGIN = import.meta.env.EXPECTEDORIGIN;
 
 
 let users = {};
