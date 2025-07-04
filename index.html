@@ -1,37 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Test</title>
+    <title>GM Authentication</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="src/style.css">
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Oi&display=swap" rel="stylesheet">
   </head>
 
 
   <body>
-    <div id="login-page">
-      <h1>REGISTER</h1>
-      <form id="register-form">
-        <label for="username1">Username:</label>
-        <input type="text" id="username1" name="username1" placeholder="Username" required>
-        <button id="register" class="buttons" type="submit">REGISTER</button>
-      </form>
+    
 
-      <h1>LOGIN</h1>
-      <form id="login-form">
-        <label for="username2">Username:</label>
-        <input type="text" id="username2" name="username2" placeholder="Username" required>
-        <button id="login" class="buttons" type="submit">LOGIN</button>
-      </form>
+
+    <div id="auth-page">
+      <!-- Top-Level Tabs -->
+      <h2>Welcome to GM Authentication</h2>
+      <div class="slide-buttons">
+        <button id="btn-register" class="tab active">Register</button>
+        <button id="btn-login" class="tab">Login</button>
+        <div id ="action-indicator" class="slide-indicator"></div>
+      </div>
+
+      <!-- Sub-Toggle (password vs passkey) -->
+      <div class="slide-buttons">
+        <button id="btn-passkey" class="tab active">Passkey</button>
+        <button id="btn-password" class="tab">Password</button>
+        <div id ="method-indicator"  class="slide-indicator"></div>
+      </div>
+
+      <!-- Forms Slider -->
+      <div class="form-container">
+        <!-- <div class="form-slider" id="form-slider"> -->
+          <!-- LOGIN PASSWORD -->
+          <form class="form-panel" data-action="login" data-method="password">
+            <h2>Login with Password</h2>
+            <input type="text" placeholder="Username" required />
+            <input type="password" placeholder="Password" required />
+            <button type="submit">Login</button>
+          </form>
+
+          <!-- LOGIN PASSKEY -->
+          <form class="form-panel" data-action="login" data-method="passkey">
+            <h2>Login with Passkey</h2>
+            <input type="text" placeholder="Username" required />
+            <button type="submit">Use Passkey</button>
+          </form>
+
+          <!-- REGISTER PASSWORD -->
+          <form class="form-panel" data-action="register" data-method="password">
+            <h2>Register with Password</h2>
+            <input type="text" placeholder="Username" required />
+            <input type="password" placeholder="Password" required />
+            <input type="password" placeholder="Confirm Password" required />
+            <button type="submit">Register</button>
+          </form>
+
+          <!-- REGISTER PASSKEY -->
+          <form class="form-panel active" data-action="register" data-method="passkey">
+            <h2>Register with Passkey</h2>
+            <input type="text" placeholder="Username" required />
+            <button type="submit">Register Passkey</button>
+          </form>
+        <!-- </div> -->
+      </div>
     </div>
 
+    <!-- Logged-In Dashboard -->
     <div id="home-page" style="display: none;">
-      <h1>Welcome to the Home Page!</h1>
-      <p>You are now logged in.</p>
+      <header>
+        <h1>Dashboard</h1>
+        <button id="logout-btn" class="logout">Logout</button>
+      </header>
+      <div class="methods">
+        <div class="method">
+          <h3>Username + Password</h3>
+          <span class="enabled">✅ Enabled</span>
+        </div>
+        <div class="method">
+          <h3>Username + Passkey</h3>
+          <button>Enable</button>
+        </div>
+        <div class="method">
+          <h3>2FA (Authenticator App)</h3>
+          <button>Enable</button>
+        </div>
+      </div>
     </div>
 
+    <!-- login-page, register-form, login-form -->
+
+    <div id="lordicon-background">
+      <lord-icon 
+        id="lordicon"
+        src="https://cdn.lordicon.com/maltvyiw.json"
+        trigger="in"
+        delay="1500"
+        stroke="bold"
+        state="in-reveal">
+      </lord-icon>
+    </div>
 
     <script src="src/client.js" type="module"></script>
-</body>
+  </body>
 </html>

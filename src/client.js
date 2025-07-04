@@ -2,10 +2,10 @@
 import { registerStart, registerFinish, loginStart, loginFinish } from './server.js';
 
 // DOM ELEMENTS
-const registerForm = document.getElementById('register-form');
-const loginForm = document.getElementById('login-form');
-const loginPage = document.getElementById('login-page');
-const homePage = document.getElementById('home-page');
+// const registerForm = document.getElementById('register-form');
+// const loginForm = document.getElementById('login-form');
+// const loginPage = document.getElementById('login-page');
+// const homePage = document.getElementById('home-page');
 
 
 // FUNCTIONS
@@ -56,5 +56,78 @@ async function login(event) {
 
 
 // EVENT LISTENERS
-registerForm.addEventListener('submit', register);
-loginForm.addEventListener('submit', login);
+// registerForm.addEventListener('submit', register);
+// loginForm.addEventListener('submit', login);
+
+// === ELEMENT REFERENCES ===
+const loginBtn            = document.getElementById("btn-login");
+const registerBtn         = document.getElementById("btn-register");
+const passwordBtn         = document.getElementById("btn-password");
+const passkeyBtn          = document.getElementById("btn-passkey");
+const logoutBtn           = document.getElementById("logout-btn");
+const authPage            = document.getElementById("auth-page");
+const homePage            = document.getElementById("home-page");
+const forms               = document.querySelectorAll("form");
+const actionIndicator     = document.getElementById("action-indicator");
+const methodIndicator     = document.getElementById("method-indicator");
+const formPanels          = document.querySelectorAll(".form-panel");
+
+
+// === STATE VARIABLES ===
+let currentAction = "register";
+let currentMethod = "passkey";
+
+
+// === FUNCTIONS ===
+
+
+function slideAction(action) {
+  currentAction = action;
+  registerBtn.classList.toggle("active", action === "register");
+  loginBtn.classList.toggle("active", action === "login");
+  actionIndicator.classList.toggle("active", action === "login");
+  updateVisibleFormPanel();
+}
+
+function slideMethod(method) {
+  currentMethod = method;
+  passkeyBtn.classList.toggle("active", method === "passkey");
+  passwordBtn.classList.toggle("active", method === "password");
+  methodIndicator.classList.toggle("active", method === "password");
+  updateVisibleFormPanel();
+}
+
+function updateVisibleFormPanel() {
+  formPanels.forEach(panel => {
+    const panelAction = panel.getAttribute("data-action");     // login or register
+    const panelMethod = panel.getAttribute("data-method");     // password or passkey
+    if (panelAction === currentAction && panelMethod === currentMethod) {
+      panel.classList.add("active");
+    } else {
+      panel.classList.remove("active");
+    }
+  });
+}
+
+function handleLogout() {
+  authPage.style.display = "block";
+  homePage.style.display = "none";
+}
+
+function handleLoginSuccess(e) {
+  e.preventDefault();
+  authPage.style.display = "none";
+  homePage.style.display = "block";
+}
+
+
+// === EVENT LISTENERS ===
+loginBtn.addEventListener("click", () => slideAction("login"));
+registerBtn.addEventListener("click", () => slideAction("register"));
+passwordBtn.addEventListener("click", () => slideMethod("password"));
+passkeyBtn.addEventListener("click", () => slideMethod("passkey"));
+logoutBtn.addEventListener("click", handleLogout);
+
+forms.forEach(form => {
+  form.addEventListener("submit", handleLoginSuccess);
+});
