@@ -1,25 +1,38 @@
 import { passkeyRegisterStart, passkeyRegisterFinish, passkeyLoginStart, passkeyLoginFinish, addPasskeyStart, addPasskeyFinish } from './methods/passkeys.js';
 import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
 import { passwordRegister, passwordLogin, addPassword } from './methods/passwords.js'
-import { add2FA } from './methods/2fa.js'
+import { add2FA, verify2FA } from './methods/2fa.js'
+
 
 // === DOME ELEMENTS ===
-const loginBtn            = document.getElementById("btn-login");
-const registerBtn         = document.getElementById("btn-register");
-const passwordBtn         = document.getElementById("btn-password");
-const passkeyBtn          = document.getElementById("btn-passkey");
-const logoutBtn           = document.getElementById("logout-btn");
-const authPage            = document.getElementById("auth-page");
-const homePage            = document.getElementById("home-page");;
-const actionIndicator     = document.getElementById("action-indicator");
-const methodIndicator     = document.getElementById("method-indicator");
-const formPanels          = document.querySelectorAll(".form-panel");
-const loginPasswordForm   = document.getElementById("login-password-form");
-const loginPasskeyForm    = document.getElementById("login-passkey-form");
-const registerPasswordForm = document.getElementById("register-password-form");
-const registerPasskeyForm  = document.getElementById("register-passkey-form");
-
-
+const loginBtn              = document.getElementById("btn-login");
+const registerBtn           = document.getElementById("btn-register");
+const passwordBtn           = document.getElementById("btn-password");
+const passkeyBtn            = document.getElementById("btn-passkey");
+const logoutBtn             = document.getElementById("logout-btn");
+const authPage              = document.getElementById("auth-page");
+const homePage              = document.getElementById("home-page");;
+const actionIndicator       = document.getElementById("action-indicator");
+const methodIndicator       = document.getElementById("method-indicator");
+const formPanels            = document.querySelectorAll(".form-panel");
+const loginPasswordForm     = document.getElementById("login-password-form");
+const loginPasskeyForm      = document.getElementById("login-passkey-form");
+const registerPasswordForm  = document.getElementById("register-password-form");
+const registerPasskeyForm   = document.getElementById("register-passkey-form");
+const qrCodeImage           = document.getElementById("qr-code");
+const secretTextField       = document.getElementById("secret-text");
+const qrOverlay             = document.getElementById("qr-overlay");
+const usernameHeader        = document.getElementById("dashboard-username");
+const enablePasswordBtn     = document.getElementById("enable-password-btn");
+const passwordInputGroup    = document.getElementById("password-input-group");
+const passwordEnabled       = document.getElementById("password-enabled-indicator")
+const submitPasswordBtn     = document.getElementById("submit-password-btn");
+const passkeyCountText      = document.getElementById("passkey-count");  
+const addPasskeyBtn         = document.getElementById("add-passkey-btn");
+const enable2faBtn          = document.getElementById("enable-2fa-btn");
+const faEnabled             = document.getElementById("2fa-enabled-indicator");
+const closeQrBtn            = document.getElementById("close-qr-code");
+const form2FA               = document.getElementById("2FA-form");
 
 // === STATE VARIABLES ===
 let currentAction = "register";
@@ -61,75 +74,36 @@ function handleLogout() {
   homePage.style.display = "none";
 }
 
+
 function handleLoginSuccess() {
   authPage.style.display = "none";
   homePage.style.display = "block";
-  console.log(user);
-
-  // Set dashboard title
-  const usernameHeader = document.getElementById("dashboard-username");
   usernameHeader.textContent = `Welcome, ${user.userName}`;
 
   // === PASSWORD METHOD ===
-  const passwordControls = document.getElementById("password-controls");
   if (user.availableMethods.password) {
-    passwordControls.innerHTML = `<span class="enabled">✅ Enabled</span>`;
+    enablePasswordBtn.style.display = "none";
+    passwordInputGroup.style.display = "none";
+    passwordEnabled.style.display = "inline";
   } else {
-    passwordControls.innerHTML = `<button id="enable-password-btn">Enable</button>`;
+    enablePasswordBtn.style.display = "inline-block";
+    passwordInputGroup.style.display = "none";
+    passwordEnabled.style.display = "none";
   }
 
   // === PASSKEY METHOD ===
   const passkeyCount = user.passkeys?.length || 0;
-  const passkeyControls = document.getElementById("passkey-controls");
-  passkeyControls.innerHTML = `
-    <span id="passkey-status">
-      ${user.availableMethods.passkey ? '✅ Enabled' : '➕ Enable'} (${passkeyCount} key${passkeyCount !== 1 ? 's' : ''})
-    </span>
-    <button id="add-passkey-btn">Add Passkey</button>
-  `;
+  passkeyCountText.textContent = `${passkeyCount > 0 ? '✅ ' : ''}${passkeyCount} Passkey${passkeyCount == 1 ? '': 's'}`;
 
   // === 2FA METHOD ===
-  const faControls = document.getElementById("2fa-controls");
   if (user.availableMethods["2FA"]) {
-    faControls.innerHTML = `<span class="enabled">✅ Enabled</span>`;
+    enable2faBtn.style.display = "none";
+    faEnabled.style.display = "inline";
   } else {
-    faControls.innerHTML = `<button id="enable-2fa-btn">Enable</button>`;
+    enable2faBtn.style.display = "inline-block";
+    faEnabled.style.display = "none";
   }
-
-  // Rebind any newly added buttons
-  bindMethodEnableButtons();
 }
-
-
-function bindMethodEnableButtons() {
-  // Enable Password
-  const enablePasswordBtn = document.getElementById("enable-password-btn");
-  if (enablePasswordBtn) {
-    enablePasswordBtn.addEventListener("click", () => {
-      const passwordControls = document.getElementById("password-controls");
-      passwordControls.innerHTML = `
-        <input type="password" id="add-password-password" placeholder="New Password">
-        <input type="password" id="add-password-confirmPassword" placeholder="Confirm Password">
-        <button id="submit-password-btn">Submit</button>
-      `;
-      document.getElementById("submit-password-btn").addEventListener("click", enablePassword);
-    });
-  }
-// Add Passkey
-  const addPasskeyBtn = document.getElementById("add-passkey-btn");
-  if (addPasskeyBtn) {
-    addPasskeyBtn.addEventListener("click", addPasskey);
-  }
-
-
-  // Enable 2FA
-  const enable2faBtn = document.getElementById("enable-2fa-btn");
-  if (enable2faBtn) {
-    enable2faBtn.addEventListener("click", add2FA);
-  }
-  
-}
-
 
 async function loginWithPassword (event) {
   event.preventDefault();
@@ -137,6 +111,12 @@ async function loginWithPassword (event) {
   const password = document.getElementById('login-password-password').value.trim();
   try {
     user = await passwordLogin(username, password);
+    console.log(user)
+    if (user.requires2FA) {
+      loginPasswordForm.classList.remove("active");
+      form2FA.classList.add("active");
+      return;
+    }
     handleLoginSuccess();
   } catch (err) {
     alert("Login Failed");
@@ -213,7 +193,7 @@ async function addPasskey() {
     const options = await addPasskeyStart(userId);
     const credential = await startRegistration({ optionsJSON: options });
     user = await addPasskeyFinish(userId, credential)
-    handleLoginSuccess();
+    handleLoginSuccess(); // reload page
   } catch (err) {
     alert("Registration Failed")
     console.error("Registration error:", err);
@@ -228,6 +208,9 @@ async function enable2FA() {
   }
   try {
     user = await add2FA(userId);
+    qrCodeImage.src = user.qrCodeDataUrl;
+    secretTextField.textContent = user.secretText;
+    qrOverlay.style.display = "block";
   } catch (err) {
     alert("Registration Failed")
     console.error("Registration error:", err);
@@ -235,14 +218,41 @@ async function enable2FA() {
   
 }
 
+async function loginWith2FA(event) {
+  event.preventDefault()
+  const code = document.getElementById("2FA-code").value.trim();
+  const userId = user.userId;
+  if (!userId || !code) return;
+
+  try {
+    user = await verify2FA(userId, code);
+    handleLoginSuccess();
+  } catch (err) {
+    alert("Invalid 2FA code");
+    console.error("2FA error:", err);
+  }
+}
+
+
 // === EVENT LISTENERS ===
 loginBtn.addEventListener("click", () => slideAction("login"));
 registerBtn.addEventListener("click", () => slideAction("register"));
 passwordBtn.addEventListener("click", () => slideMethod("password"));
 passkeyBtn.addEventListener("click", () => slideMethod("passkey"));
 logoutBtn.addEventListener("click", handleLogout);
-
 loginPasswordForm.addEventListener("submit", loginWithPassword)
-loginPasskeyForm .addEventListener("submit", loginWithPasskey)
+loginPasskeyForm.addEventListener("submit", loginWithPasskey)
 registerPasswordForm.addEventListener("submit", registerWithPassword)
 registerPasskeyForm.addEventListener("submit", registerWithPasskey)
+enablePasswordBtn.addEventListener("click", () => {
+  enablePasswordBtn.style.display = "none";
+  passwordInputGroup.style.display = "block";
+});
+submitPasswordBtn.addEventListener("click", enablePassword);
+enable2faBtn.addEventListener("click", enable2FA);
+addPasskeyBtn.addEventListener("click", addPasskey);
+closeQrBtn.addEventListener("click", () => {
+  qrOverlay.style.display = "none";
+  handleLoginSuccess(); // reload page
+});
+form2FA.addEventListener("submit", loginWith2FA)

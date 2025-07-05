@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@simplewebauthn/browser": "^13.1.0",
-    "@simplewebauthn/server": "^13.1.1"
+    "@simplewebauthn/server": "^13.1.1",
+    "bcryptjs": "^3.0.2",
+    "qrcode": "^1.5.4"
   }
 }

@@ -21,7 +21,8 @@ export function bufferToBase64URLString(buffer) {
   return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-export function stringToBase64URLString(str) {
-  const base64String = btoa(str);
-  return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+export function createRandomBase64URLString() {
+  const emptyBuffer = new Uint8Array(20)
+  const randomBuffer = crypto.getRandomValues(emptyBuffer)
+  return bufferToBase64URLString(randomBuffer)
 }

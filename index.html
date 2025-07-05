@@ -22,7 +22,19 @@
 
     <div id="auth-page">
       <!-- Top-Level Tabs -->
-      <h2>Welcome to GM Authentication</h2>
+      <div class="title-text">
+        <h2>Welcome to GM Authentication</h2>
+        <lord-icon 
+          id="small-lordicon"
+          src="https://cdn.lordicon.com/maltvyiw.json"
+          trigger="in"
+          delay="1500"
+          stroke="bold"
+          state="in-reveal">
+        </lord-icon>
+      </div>
+      
+      
       <div class="slide-buttons">
         <button id="btn-register" class="tab active">Register</button>
         <button id="btn-login" class="tab">Login</button>
@@ -38,38 +50,42 @@
 
       <!-- Forms Slider -->
       <div class="form-container">
-        <!-- <div class="form-slider" id="form-slider"> -->
-          <!-- LOGIN PASSWORD -->
-          <form id="login-password-form" class="form-panel" data-action="login" data-method="password">
-            <h2>Login with Password</h2>
-            <input id="login-password-username" type="text" placeholder="Username" required />
-            <input id="login-password-password" type="password" placeholder="Password" required />
-            <button type="submit">Login</button>
-          </form>
+        <!-- LOGIN PASSWORD -->
+        <form id="login-password-form" class="form-panel" data-action="login" data-method="password">
+          <h2>Login with Password</h2>
+          <input id="login-password-username" type="text" placeholder="Username" required />
+          <input id="login-password-password" type="password" placeholder="Password" required />
+          <button type="submit">Login</button>
+        </form>
 
-          <!-- LOGIN PASSKEY -->
-          <form id="login-passkey-form" class="form-panel" data-action="login" data-method="passkey">
-            <h2>Login with Passkey</h2>
-            <input id="login-passkey-username" type="text" placeholder="Username" required />
-            <button type="submit">Use Passkey</button>
-          </form>
+        <!-- LOGIN PASSKEY -->
+        <form id="login-passkey-form" class="form-panel" data-action="login" data-method="passkey">
+          <h2>Login with Passkey</h2>
+          <input id="login-passkey-username" type="text" placeholder="Username" required />
+          <button type="submit">Use Passkey</button>
+        </form>
 
-          <!-- REGISTER PASSWORD -->
-          <form id="register-password-form" class="form-panel" data-action="register" data-method="password">
-            <h2>Register with Password</h2>
-            <input id="register-password-username" type="text" placeholder="Username" required />
-            <input id="register-password-password" type="password" placeholder="Password" required />
-            <input id="register-password-confirmPassword" type="password" placeholder="Confirm Password" required />
-            <button type="submit">Register</button>
-          </form>
+        <!-- REGISTER PASSWORD -->
+        <form id="register-password-form" class="form-panel" data-action="register" data-method="password">
+          <h2>Register with Password</h2>
+          <input id="register-password-username" type="text" placeholder="Username" required />
+          <input id="register-password-password" type="password" placeholder="Password" required />
+          <input id="register-password-confirmPassword" type="password" placeholder="Confirm Password" required />
+          <button type="submit">Register</button>
+        </form>
 
-          <!-- REGISTER PASSKEY -->
-          <form id="register-passkey-form" class="form-panel active" data-action="register" data-method="passkey">
-            <h2>Register with Passkey</h2>
-            <input id="register-passkey-username" type="text" placeholder="Username" required />
-            <button type="submit">Register Passkey</button>
-          </form>
-        <!-- </div> -->
+        <!-- REGISTER PASSKEY -->
+        <form id="register-passkey-form" class="form-panel active" data-action="register" data-method="passkey">
+          <h2>Register with Passkey</h2>
+          <input id="register-passkey-username" type="text" placeholder="Username" required />
+          <button type="submit">Register Passkey</button>
+        </form>
+
+        <form id="2FA-form" class="form-panel">
+          <h2>Enter 2FA Code</h2>
+          <input id="2FA-code" type="text" placeholder="123456" maxlength="6" required />
+          <button type="submit">Verify</button>
+        </form>
       </div>
     </div>
 
@@ -84,14 +100,20 @@
         <div class="method" id="method-password">
           <h3>Username + Password</h3>
           <div id="password-controls">
+            <span id="password-enabled-indicator" class="enabled" style="display: none;">✅ Enabled</span>
             <button id="enable-password-btn">Enable</button>
+            <div id="password-input-group" style="display: none;">
+              <input type="password" id="add-password-password" placeholder="New Password" />
+              <input type="password" id="add-password-confirmPassword" placeholder="Confirm Password" />
+              <button id="submit-password-btn">Submit</button>
+            </div>
           </div>
         </div>
 
         <div class="method" id="method-passkey">
           <h3>Username + Passkey</h3>
           <div id="passkey-controls">
-            <span id="passkey-count">Passkeys: 0</span>
+            <span id="passkey-count">✅ Enabled (1 key)</span>
             <button id="add-passkey-btn">Add Passkey</button>
           </div>
         </div>
@@ -99,23 +121,19 @@
         <div class="method" id="method-2fa">
           <h3>2FA (Authenticator App)</h3>
           <div id="2fa-controls">
+            <span id="2fa-enabled-indicator" style="display: none;">✅ Enabled</span>
             <button id="enable-2fa-btn">Enable</button>
+
+            <div id="qr-overlay" style="display: none;">
+              <div class="qr-box">
+                <img id="qr-code" alt="Scan QR Code"/>
+                <p>Or enter manually: <span id="secret-text"></span></p>
+                <button id="close-qr-code">Close</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- login-page, register-form, login-form -->
-
-    <div id="lordicon-background">
-      <lord-icon 
-        id="lordicon"
-        src="https://cdn.lordicon.com/maltvyiw.json"
-        trigger="in"
-        delay="1500"
-        stroke="bold"
-        state="in-reveal">
-      </lord-icon>
     </div>
 
     <script src="src/main.js" type="module"></script>

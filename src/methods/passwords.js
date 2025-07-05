@@ -1,35 +1,26 @@
-import { createUser, storePasskey, extendUser, getUser, getPasskey, checkIfUserExists, getUserId } from './database.js';
-import { stringToBase64URLString } from '../helpers/base64url.js';
+import { createUser, extendUser, getUser, checkIfUserExists, getUserId } from './database.js';
+import { createRandomBase64URLString } from '../helpers/base64url.js'
+import bcrypt from "bcryptjs";
 
-const salt = "1saltmy2"
-
-async function hashPassword(password) {
-  const data = new TextEncoder().encode(salt + password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return bufferToHex(hashBuffer);
+function hashPassword(password) {
+  return bcrypt.hashSync(password, 10);
 }
 
 async function verifyPassword(password, expectedHash) {
-  const hash = await hashPassword(password, salt);
-  return hash === expectedHash;
+  return bcrypt.compareSync(password, expectedHash);
 }
 
-function bufferToHex(buffer) {
-  return Array.from(new Uint8Array(buffer))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-}
+
 
 async function passwordRegister (username, password ,confirmPassword) {
   if (password !== confirmPassword) {
     throw new Error("passwords do not match")
   }
   await checkIfUserExists(username);
-  const userId = stringToBase64URLString(crypto.randomUUID());
   const user = {
-    userId: userId,
+    userId: createRandomBase64URLString(),
     userName: username,
-    password: await hashPassword(password),
+    password: hashPassword(password),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     availableMethods: {"passkey": false, "password": true, "2FA": false},
@@ -44,9 +35,15 @@ async function passwordLogin (username, password) {
   if (!user.availableMethods.password) {
       throw new Error("User does not have password enabled");
   }
-  const isValid = await verifyPassword(password, user.password);
+  const isValid = verifyPassword(password, user.password);
   if (!isValid) {
     throw new Error("Invalid password");
+  }
+  if (user.availableMethods["2FA"]) {
+    return {
+      "requires2FA": true,
+      "userId": user.userId
+    }
   }
   return user;
 }
@@ -59,14 +56,15 @@ async function addPassword (userId, password, confirmPassword) {
   if (user.availableMethods.password) {
       throw new Error("User already has password enabled");
   }
+  const hashedPW = hashPassword(password)
   await extendUser(userId, {
-    password: await hashPassword(password), 
+    password: hashedPW, 
     updatedAt: new Date().toISOString(),
     "availableMethods": {...user.availableMethods, "password": true },
   })
   return {
     ...user,
-    password: await hashPassword(password), 
+    password: hashedPW, 
     updatedAt: new Date().toISOString(),
     "availableMethods": {...user.availableMethods, "password": true },
   }
