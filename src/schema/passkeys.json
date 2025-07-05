@@ -1,0 +1,13 @@
+{
+  "credId": "string",
+  "credPublicKey": "blob",
+  "userId": "string",
+  "aaguid": "string",
+  "counter": "int",
+  "transports": "string",
+  "rpId": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "credentialDeviceType": "string",
+  "credentialBackedUp": "boolean"
+}

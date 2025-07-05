@@ -40,33 +40,33 @@
       <div class="form-container">
         <!-- <div class="form-slider" id="form-slider"> -->
           <!-- LOGIN PASSWORD -->
-          <form class="form-panel" data-action="login" data-method="password">
+          <form id="login-password-form" class="form-panel" data-action="login" data-method="password">
             <h2>Login with Password</h2>
-            <input type="text" placeholder="Username" required />
-            <input type="password" placeholder="Password" required />
+            <input id="login-password-username" type="text" placeholder="Username" required />
+            <input id="login-password-password" type="password" placeholder="Password" required />
             <button type="submit">Login</button>
           </form>
 
           <!-- LOGIN PASSKEY -->
-          <form class="form-panel" data-action="login" data-method="passkey">
+          <form id="login-passkey-form" class="form-panel" data-action="login" data-method="passkey">
             <h2>Login with Passkey</h2>
-            <input type="text" placeholder="Username" required />
+            <input id="login-passkey-username" type="text" placeholder="Username" required />
             <button type="submit">Use Passkey</button>
           </form>
 
           <!-- REGISTER PASSWORD -->
-          <form class="form-panel" data-action="register" data-method="password">
+          <form id="register-password-form" class="form-panel" data-action="register" data-method="password">
             <h2>Register with Password</h2>
-            <input type="text" placeholder="Username" required />
-            <input type="password" placeholder="Password" required />
+            <input id="register-password-username" type="text" placeholder="Username" required />
+            <input id="register-password-password" type="password" placeholder="Password" required />
             <input type="password" placeholder="Confirm Password" required />
             <button type="submit">Register</button>
           </form>
 
           <!-- REGISTER PASSKEY -->
-          <form class="form-panel active" data-action="register" data-method="passkey">
+          <form id="register-passkey-form" class="form-panel active" data-action="register" data-method="passkey">
             <h2>Register with Passkey</h2>
-            <input type="text" placeholder="Username" required />
+            <input id="register-passkey-username" type="text" placeholder="Username" required />
             <button type="submit">Register Passkey</button>
           </form>
         <!-- </div> -->
@@ -108,6 +108,6 @@
       </lord-icon>
     </div>
 
-    <script src="src/client.js" type="module"></script>
+    <script src="src/main.js" type="module"></script>
   </body>
 </html>

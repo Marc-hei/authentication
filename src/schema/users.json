@@ -1,0 +1,10 @@
+{
+  "userId": "string",
+  "userName": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "availableMethods": {"passkey": "boolean", "password": "boolean", "2FA": "boolean"},
+  "passkeys": ["string", "string"],
+  "password": "string",
+  "2FA": "string"
+}
