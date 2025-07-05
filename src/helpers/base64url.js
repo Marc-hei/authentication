@@ -20,3 +20,8 @@ export function bufferToBase64URLString(buffer) {
   const base64String = btoa(str);
   return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
+
+export function stringToBase64URLString(str) {
+  const base64String = btoa(str);
+  return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}

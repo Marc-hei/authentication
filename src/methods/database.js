@@ -30,6 +30,8 @@ async function getPasskey(credId) {
 }
 
 async function extendUser(userId, options) {
+  console.log(userId)
+  console.log(options)
   await updateDoc(doc(db, "users", userId), options);
 }
 

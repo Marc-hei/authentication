@@ -6,10 +6,9 @@ const EXPECTEDORIGIN = import.meta.env.VITE_EXPECTEDORIGIN;
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
 
 
-let users = {};
 let challenges = {};
 
-async function registerStart (username) {
+async function passkeyRegisterStart (username) {
     await checkIfUserExists(username);
     const options = await generateRegistrationOptions({
         rpID: RPID,
@@ -20,23 +19,26 @@ async function registerStart (username) {
     return options;
 };
 
-async function registerFinish (userId, username, credential) {
+async function passkeyRegisterFinish (userId, username, credential) {
     const verification = await verifyRegistrationResponse({
         response: credential,
         expectedChallenge: challenges[username],
         expectedOrigin: EXPECTEDORIGIN
     });
     const { verified, registrationInfo } = verification;
+    if (!verified) {
+        throw new Error("verification unsuccessful")
+    }
 
-    await createUser({
+    const user = {
         userId: userId,
         userName: username,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         availableMethods: {"passkey": true, "password": false, "2FA": false},
         passkeys: [credential.id],
-    })
-    await storePasskey(({
+    }
+    const passkey = {
         "credId": registrationInfo.credential.id,
         "credential": {
             id: registrationInfo.credential.id,
@@ -51,11 +53,14 @@ async function registerFinish (userId, username, credential) {
         "updatedAt": new Date().toISOString(),
         "credentialDeviceType": registrationInfo.credentialDeviceType,
         "credentialBackedUp": registrationInfo.credentialBackedUp,
-    }))
-    return verified;
+    }
+
+    await storePasskey(passkey);
+    await createUser(user);
+    return user;
 };
 
-async function loginStart(username) {
+async function passkeyLoginStart(username) {
     const { userId } = await getUserId(username);
     const user = await getUser(userId);
     if (!user.availableMethods.passkey) {
@@ -65,6 +70,7 @@ async function loginStart(username) {
     for (const credId of user.passkeys) {
         allowCredentials.push({id: credId});
     }
+    console.log(allowCredentials)
     const options = await generateAuthenticationOptions({
         rpID: RPID,
         allowCredentials: allowCredentials,
@@ -73,7 +79,7 @@ async function loginStart(username) {
     return options
 };
 
-async function loginFinish (username, credential) {
+async function passkeyLoginFinish (username, credential) {
     const { userId } = await getUserId(username);
     const user = await getUser(userId);
     if (!user.availableMethods.passkey) {
@@ -89,9 +95,67 @@ async function loginFinish (username, credential) {
         credential: data.credential,
     });
     const { verified, authenticationInfo } = verification;
-    return verified;
+    if (!verified) {
+        throw new Error("verification unsuccessful")
+    }
+    return user;
 };
 
+async function addPasskeyStart (userId) { // TODO: add instead of enable because more than one can be there
+    const user = await getUser(userId);
+    const options = await generateRegistrationOptions({
+        rpID: RPID,
+        rpName: RPNAME,
+        userName: user.userName,
+        userID: base64URLStringToBuffer(userId),
+    })
+    challenges[user.userName] = options.challenge;
+    console.log(options)
+    return options;
+}
 
+async function addPasskeyFinish (userId, credential) { // TODO: add instead of enable because more than one can be there
+    const user = await getUser(userId);
+    const verification = await verifyRegistrationResponse({
+        response: credential,
+        expectedChallenge: challenges[user.userName],
+        expectedOrigin: EXPECTEDORIGIN
+    });
+    const { verified, registrationInfo } = verification;
+    if (!verified) {
+        throw new Error("verification unsuccessful")
+    }
+    
+    const passkey = {
+        "credId": registrationInfo.credential.id,
+        "credential": {
+            id: registrationInfo.credential.id,
+            publicKey: bufferToBase64URLString(registrationInfo.credential.publicKey),
+            counter: registrationInfo.credential.counter,
+            transports: registrationInfo.credential.transports,
+        },
+        "userId": userId,
+        "aaguid": registrationInfo.aaguid,
+        "rpId": RPID,
+        "createdAt": new Date().toISOString(),
+        "updatedAt": new Date().toISOString(),
+        "credentialDeviceType": registrationInfo.credentialDeviceType,
+        "credentialBackedUp": registrationInfo.credentialBackedUp,
+    }
+    
+    await storePasskey(passkey);
+    await extendUser(userId, {
+        updatedAt: new Date().toISOString(),
+        availableMethods: {...user.availableMethods, passkey:true},
+        "passkeys": [...(user.passkeys || []), credential.id]
+    });
+    return {
+        ...user,
+        updatedAt: new Date().toISOString(),
+        availableMethods: {...user.availableMethods, passkey:true},
+        "passkeys": [...(user.passkeys || []), credential.id]
+    };
+    
+}
 
-export {registerStart, registerFinish, loginStart, loginFinish}
+export { passkeyRegisterStart, passkeyRegisterFinish, passkeyLoginStart, passkeyLoginFinish, addPasskeyFinish, addPasskeyStart }

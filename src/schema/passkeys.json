@@ -1,10 +1,14 @@
 {
   "credId": "string",
-  "credPublicKey": "blob",
+  "credential": {
+    "id": "string",
+    "publicKey": "string",
+    "counter": "int",
+    "transports": "string"
+  },
   "userId": "string",
   "aaguid": "string",
   "counter": "int",
-  "transports": "string",
   "rpId": "string",
   "createdAt": "string",
   "updatedAt": "string",

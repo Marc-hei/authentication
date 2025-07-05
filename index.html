@@ -59,7 +59,7 @@
             <h2>Register with Password</h2>
             <input id="register-password-username" type="text" placeholder="Username" required />
             <input id="register-password-password" type="password" placeholder="Password" required />
-            <input type="password" placeholder="Confirm Password" required />
+            <input id="register-password-confirmPassword" type="password" placeholder="Confirm Password" required />
             <button type="submit">Register</button>
           </form>
 
@@ -76,21 +76,31 @@
     <!-- Logged-In Dashboard -->
     <div id="home-page" style="display: none;">
       <header>
-        <h1>Dashboard</h1>
+        <h1 id="dashboard-username">Dashboard</h1>
         <button id="logout-btn" class="logout">Logout</button>
       </header>
+
       <div class="methods">
-        <div class="method">
+        <div class="method" id="method-password">
           <h3>Username + Password</h3>
-          <span class="enabled">✅ Enabled</span>
+          <div id="password-controls">
+            <button id="enable-password-btn">Enable</button>
+          </div>
         </div>
-        <div class="method">
+
+        <div class="method" id="method-passkey">
           <h3>Username + Passkey</h3>
-          <button>Enable</button>
+          <div id="passkey-controls">
+            <span id="passkey-count">Passkeys: 0</span>
+            <button id="add-passkey-btn">Add Passkey</button>
+          </div>
         </div>
-        <div class="method">
+
+        <div class="method" id="method-2fa">
           <h3>2FA (Authenticator App)</h3>
-          <button>Enable</button>
+          <div id="2fa-controls">
+            <button id="enable-2fa-btn">Enable</button>
+          </div>
         </div>
       </div>
     </div>
