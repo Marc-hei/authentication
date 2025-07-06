@@ -1,6 +1,6 @@
 # GM Authentication
 
-GM Authentication is a modern authentication system that supports **passkeys**, **password login**, and **two-factor authentication (2FA)**. It’s built with a strong understanding of the WebAuthn standard and provides a clean, working prototype for multi-method authentication.
+GM Authentication is a project that implemented **passkeys**, **password login**, and **two-factor authentication (2FA)**. It’s built with a strong understanding of the WebAuthn standard and provides a clean, working prototype for multi-method authentication. The goal of this project was to understand the underlying algortihms and data exchange that takes place. 
 
 **Live Demo:** [gm-authentication.netlify.app](https://gm-authentication.netlify.app)
 
