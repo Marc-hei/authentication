@@ -42,9 +42,7 @@ let user;
 try {
   user = await getSessionCookie();
   handleLoginSuccess();
-} catch (err) {
-  console.error(err);
-}
+} catch (err) {}
 
 
 // === FUNCTIONS ===

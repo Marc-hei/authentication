@@ -69,7 +69,7 @@ async function passkeyLoginStart(username) {
     }
     let allowCredentials = [];
     for (const credId of user.passkeys) {
-        allowCredentials.push({id: credId});
+        allowCredentials.push({id: credId, type:"public-key"});
     }
     const options = await generateAuthenticationOptions({
         rpID: RPID,
@@ -104,11 +104,16 @@ async function passkeyLoginFinish (username, credential) {
 
 async function addPasskeyStart (userId) {
     const user = await getUser(userId);
+    let excludeCredentials = [];
+    for (const credId of user.passkeys) {
+        excludeCredentials.push({id: credId, type:"public-key"});
+    }
     const options = await generateRegistrationOptions({
         rpID: RPID,
         rpName: RPNAME,
         userName: user.userName,
         userID: base64URLStringToBuffer(userId),
+        excludeCredentials: excludeCredentials
     })
     challenges[user.userName] = options.challenge;
     return options;

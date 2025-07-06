@@ -1,11 +1,8 @@
-body {
+html, body {
   margin: 0;
   font-family: sans-serif;
   background: #eef3f8;
-  position: relative;
 }
-
-
 
 #small-lordicon {
   width:64px;
@@ -29,6 +26,25 @@ body {
     transform: translateY(0);
   }
 }
+
+.site-footer {
+  position: absolute;
+  bottom: 0;
+  left:0;
+  right:0;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #888;
+  z-index: 1000;
+}
+
+.site-footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+
 
 /* ######################################## */
 /* ######################################## */
@@ -133,8 +149,11 @@ body {
   background: #003d7f;
 }
 
-
-
+@media (max-width: 768px) {
+  #auth-page {
+    margin: 20px auto;
+  }
+}
 
 
 
@@ -219,8 +238,3 @@ header {
 }
 
 
-@media (max-width: 768px) {
-  #auth-page {
-    margin: 20px auto;
-  }
-}
