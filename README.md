@@ -49,7 +49,7 @@ GM Authentication is a modern authentication system that supports **passkeys**, 
 We relied on these resources (and many more) to understand and implement passkeys:
 
 - [SimpleWebAuthn GitHub Repository](https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/)
-- [Passkeys Guide](https://www.passkeys.com/guide#running-application)
+- [Passkeys Guide](https://www.passkeys.com/guide)
 - [WebAuthn Guide](https://webauthn.guide/)
 - [web.dev: Passkey Registration](https://web.dev/articles/passkey-registration)
 
