@@ -59,8 +59,8 @@ We relied on these resources (and many more) to understand and implement passkey
 
 | Name               | GitHub / Contact            |
 |--------------------|-----------------------------|
-| Gabriel Stegmaier  | https://github.com/Marc-hei |
-| Marc Heinimann     | https://github.com/gstegm   |
+| Gabriel Stegmaier  | https://github.com/gstegm   |
+| Marc Heinimann     | https://github.com/Marc-hei |
 
 ---
 
