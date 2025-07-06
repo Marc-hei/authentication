@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getFirestore, addDoc, doc, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js'
+import { getFirestore, doc, getDoc, updateDoc, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js'
 
 const firebaseConfig = {
   apiKey: "AIzaSyBQrF1Cm-t9wiWGDXLTLMo4rw8sx21CGzc",
@@ -30,20 +30,16 @@ async function getPasskey(credId) {
 }
 
 async function extendUser(userId, options) {
-  console.log(userId)
-  console.log(options)
   await updateDoc(doc(db, "users", userId), options);
 }
 
 async function getUser(userId) {
-  console.log(userId)
   const snapshot = await getDoc(doc(db, "users", userId));
   if (snapshot.exists()) {
     return snapshot.data();
   } else {
     throw new Error("User not found");
   }
-
 }
 
 async function getUserId(username) {
@@ -64,5 +60,22 @@ async function checkIfUserExists(username) {
   }
 }
 
+async function createSession(sessionId, options) {
+  await setDoc(doc(db, "sessions", sessionId), options);
+}
 
-export { createUser, extendUser, getUser, checkIfUserExists, getUserId, storePasskey, getPasskey }
+async function getSession(sessionId) {
+  const snapshot = await getDoc(doc(db, "sessions", sessionId));
+  if (snapshot.exists()) {
+    return snapshot.data();
+  } else {
+    throw new Error("Session not found");
+  }
+}
+
+async function removeSession(sessionId) {
+  await deleteDoc(doc(db, "sessions", sessionId));
+}
+
+
+export { createUser, extendUser, getUser, checkIfUserExists, getUserId, storePasskey, getPasskey, createSession, getSession, removeSession }

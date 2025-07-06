@@ -5,6 +5,8 @@ body {
   position: relative;
 }
 
+
+
 #small-lordicon {
   width:64px;
   height:64px;
@@ -15,7 +17,18 @@ body {
   align-items: center;
 }
 
+#auth-page, #home-page {
+  transform: translateY(20px);
+  animation: fadeInUp 1s ease 0.5s forwards;
+  opacity: 0;
+}
 
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 /* ######################################## */
 /* ######################################## */

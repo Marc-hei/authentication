@@ -1,6 +1,7 @@
+import QRCode from 'qrcode'
 import { createUser, storePasskey, extendUser, getUser, getPasskey, checkIfUserExists, getUserId } from './database.js';
 import { createRandomBase32String } from '../helpers/base32.js'
-import QRCode from 'qrcode'
+import { setSessionCookie } from './cookie.js';
 
 async function totp(key, secs = 30, digits = 6){
   return hotp(unbase32(key), pack64bu(Date.now() / 1000 / secs), digits);
@@ -64,6 +65,7 @@ async function verify2FA(userId, code) {
   }
   const expectedCode = await totp(user["2FA"]); // generate current TOTP from secret
   if (code === expectedCode) {
+    await setSessionCookie(userId);
     return user;
   } else {
     throw new Error("Invalid 2FA code");

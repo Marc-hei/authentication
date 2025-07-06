@@ -1,8 +1,8 @@
-import { passkeyRegisterStart, passkeyRegisterFinish, passkeyLoginStart, passkeyLoginFinish, addPasskeyStart, addPasskeyFinish } from './methods/passkeys.js';
 import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
-import { passwordRegister, passwordLogin, addPassword } from './methods/passwords.js'
-import { add2FA, verify2FA } from './methods/2fa.js'
-
+import { passkeyRegisterStart, passkeyRegisterFinish, passkeyLoginStart, passkeyLoginFinish, addPasskeyStart, addPasskeyFinish } from './methods/passkey.js';
+import { passwordRegister, passwordLogin, addPassword } from './methods/password.js';
+import { add2FA, verify2FA } from './methods/2fa.js';
+import { getSessionCookie, removeSessionCookie } from './methods/cookie.js';
 
 // === DOME ELEMENTS ===
 const loginBtn              = document.getElementById("btn-login");
@@ -39,6 +39,13 @@ let currentAction = "register";
 let currentMethod = "passkey";
 let user;
 
+try {
+  user = await getSessionCookie();
+  handleLoginSuccess();
+} catch (err) {
+  console.error(err);
+}
+
 
 // === FUNCTIONS ===
 function slideAction(action) {
@@ -69,9 +76,14 @@ function updateVisibleFormPanel() {
   });
 }
 
-function handleLogout() {
-  authPage.style.display = "block";
-  homePage.style.display = "none";
+async function handleLogout() {
+  try {
+    await removeSessionCookie();
+    authPage.style.display = "block";
+    homePage.style.display = "none";
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 
@@ -111,7 +123,6 @@ async function loginWithPassword (event) {
   const password = document.getElementById('login-password-password').value.trim();
   try {
     user = await passwordLogin(username, password);
-    console.log(user)
     if (user.requires2FA) {
       loginPasswordForm.classList.remove("active");
       form2FA.classList.add("active");

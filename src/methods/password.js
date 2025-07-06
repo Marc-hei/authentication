@@ -1,5 +1,6 @@
 import { createUser, extendUser, getUser, checkIfUserExists, getUserId } from './database.js';
-import { createRandomBase64URLString } from '../helpers/base64url.js'
+import { createRandomBase64URLString } from '../helpers/base64url.js';
+import { setSessionCookie } from './cookie.js';
 import bcrypt from "bcryptjs";
 
 function hashPassword(password) {
@@ -17,8 +18,9 @@ async function passwordRegister (username, password ,confirmPassword) {
     throw new Error("passwords do not match")
   }
   await checkIfUserExists(username);
+  const userId = createRandomBase64URLString()
   const user = {
-    userId: createRandomBase64URLString(),
+    userId: userId,
     userName: username,
     password: hashPassword(password),
     createdAt: new Date().toISOString(),
@@ -26,6 +28,7 @@ async function passwordRegister (username, password ,confirmPassword) {
     availableMethods: {"passkey": false, "password": true, "2FA": false},
   }
   await createUser(user)
+  await setSessionCookie(userId);
   return user;
 }
 
@@ -45,6 +48,7 @@ async function passwordLogin (username, password) {
       "userId": user.userId
     }
   }
+  await setSessionCookie(userId);
   return user;
 }
 

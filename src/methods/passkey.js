@@ -1,11 +1,11 @@
 import { createUser, storePasskey, extendUser, getUser, getPasskey, checkIfUserExists, getUserId } from './database.js';
 import { base64URLStringToBuffer, bufferToBase64URLString } from '../helpers/base64url.js';
+import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
+import { setSessionCookie } from './cookie.js';
+
 const RPID = import.meta.env.VITE_RPID;
 const RPNAME = import.meta.env.VITE_RPNAME;
 const EXPECTEDORIGIN = import.meta.env.VITE_EXPECTEDORIGIN;
-import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
-
-
 let challenges = {};
 
 async function passkeyRegisterStart (username) {
@@ -57,6 +57,7 @@ async function passkeyRegisterFinish (userId, username, credential) {
 
     await storePasskey(passkey);
     await createUser(user);
+    await setSessionCookie(userId);
     return user;
 };
 
@@ -70,13 +71,12 @@ async function passkeyLoginStart(username) {
     for (const credId of user.passkeys) {
         allowCredentials.push({id: credId});
     }
-    console.log(allowCredentials)
     const options = await generateAuthenticationOptions({
         rpID: RPID,
         allowCredentials: allowCredentials,
     })
     challenges[username] = options.challenge;
-    return options
+    return options;
 };
 
 async function passkeyLoginFinish (username, credential) {
@@ -98,10 +98,11 @@ async function passkeyLoginFinish (username, credential) {
     if (!verified) {
         throw new Error("verification unsuccessful")
     }
+    await setSessionCookie(userId)
     return user;
 };
 
-async function addPasskeyStart (userId) { // TODO: add instead of enable because more than one can be there
+async function addPasskeyStart (userId) {
     const user = await getUser(userId);
     const options = await generateRegistrationOptions({
         rpID: RPID,
@@ -110,11 +111,10 @@ async function addPasskeyStart (userId) { // TODO: add instead of enable because
         userID: base64URLStringToBuffer(userId),
     })
     challenges[user.userName] = options.challenge;
-    console.log(options)
     return options;
 }
 
-async function addPasskeyFinish (userId, credential) { // TODO: add instead of enable because more than one can be there
+async function addPasskeyFinish (userId, credential) {
     const user = await getUser(userId);
     const verification = await verifyRegistrationResponse({
         response: credential,
