@@ -7,7 +7,7 @@ function hashPassword(password) {
   return bcrypt.hashSync(password, 10);
 }
 
-async function verifyPassword(password, expectedHash) {
+function verifyPassword(password, expectedHash) {
   return bcrypt.compareSync(password, expectedHash);
 }
 
